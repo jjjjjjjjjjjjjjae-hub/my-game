@@ -2,37 +2,70 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Тест</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D World</title>
     <style>
-        body { 
-            background-color: #111; 
-            color: #0f0; 
-            display: flex; 
-            flex-direction: column;
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0;
-            font-family: monospace;
-        }
-        .box {
-            border: 2px solid #0f0;
-            padding: 20px;
-            text-align: center;
-        }
+        body { margin: 0; background-color: #000; overflow: hidden; }
+        #info { position: fixed; top: 10px; width: 100%; text-align: center; color: white; font-family: monospace; z-index: 100; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h1>САЙТ ЖҰМЫС ІСТЕП ТҰР!</h1>
-        <p>Пайдаланушы: jjjjjjjjjjjjjjae-hub</p>
-        <p id="time"></p>
-    </div>
+    <div id="info">3D ӘЛЕМ ЖҮКТЕЛУДЕ...</div>
 
-    <script>
-        // Скрипт жұмыс істеп тұрғанын тексеру
-        document.getElementById('time').innerText = "Қазіргі уақыт: " + new Date().toLocaleTimeString();
-        console.log("Сайт сәтті ашылды!");
+    <script type="module">
+        // Three.js-ті интернеттен тікелей аламыз
+        import * as THREE from 'https://cdn.skypack.dev/three@0.160.0';
+
+        const info = document.getElementById('info');
+
+        try {
+            // 1. Сахна мен Камера
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111111);
+            
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 5, 10);
+
+            // 2. Рендерер
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // 3. Тор (Grid) - егер бұл көрінсе, 3D жұмыс істеп тұр!
+            const grid = new THREE.GridHelper(20, 20, 0x00ff00, 0x444444);
+            scene.add(grid);
+
+            // 4. Жарық
+            const light = new THREE.AmbientLight(0xffffff, 1);
+            scene.add(light);
+
+            // 5. Тест ретінде текше (Cube) қосамыз
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+            const cube = new THREE.Mesh(geometry, material);
+            cube.position.y = 0.5;
+            scene.add(cube);
+
+            info.innerText = "3D ЖҰМЫС ІСТЕП ТҰР!";
+
+            // Анимация
+            function animate() {
+                requestAnimationFrame(animate);
+                cube.rotation.y += 0.01; // Текше айналып тұрады
+                renderer.render(scene, camera);
+            }
+            animate();
+
+        } catch (e) {
+            info.innerText = "Қате шықты: " + e.message;
+        }
+
+        // Экран өлшемі өзгергенде бейімделу
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
 </body>
 </html>
