@@ -29,3 +29,11 @@ The supplied glove skin is malformed and excluded from the scene. Collision is a
 ## Assets and tooling
 
 See CREDITS.md for source and license attribution. vendor/ contains Three.js r180. tools/optimize.py creates texture variants from the original uploaded GLBs, and tools/terrain.mjs precomputes terrain using local vendor modules. Original 228 MiB source uploads are not included in the published folder.
+
+
+## v0.2 DEMO жаңартуы
+- Телефонда Start басқанда fullscreen режимі және landscape lock сұралады.
+- 2 ойыншы бір `public-demo-1` бөлмесіне P2P/WebRTC арқылы автоматты қосылады; HUD `ОНЛАЙН 1/2` → `2/2` болып өзгереді.
+- Demo нұсқада жүруге болатын аймақ бір секторға шектелді.
+- Mobile рендер HD-ға жақындатылды: antialias, жоғары pixel ratio, anisotropic filtering және 0.75-тен төмен түспейтін adaptive resolution.
+- Auto графика 4 GB+ құрылғыларда high asset қолданады; әлсіз құрылғыда mobile asset қалады.
