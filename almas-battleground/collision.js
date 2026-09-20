@@ -1,0 +1,10 @@
+import * as T from 'three';
+// Static triangle hierarchy: discard whole branches before checking triangles.
+export function accelerate(mesh){
+ const g=mesh.geometry,p=g.attributes.position,idx=g.index;
+ const count=(idx?idx.count:p.count)/3,tri=[];const vertex=(i)=>idx?idx.getX(i):i;
+ for(let t=0;t<count;t++){const ids=[vertex(t*3),vertex(t*3+1),vertex(t*3+2)],min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];for(const i of ids){const v=[p.getX(i),p.getY(i),p.getZ(i)];for(let a=0;a<3;a++){min[a]=Math.min(min[a],v[a]);max[a]=Math.max(max[a],v[a]);}}tri.push({ids,min,max,c:min.map((v,a)=>(v+max[a])/2)});}
+ function build(items){const lo=[Infinity,Infinity,Infinity],hi=[-Infinity,-Infinity,-Infinity];for(const t of items)for(let a=0;a<3;a++){lo[a]=Math.min(lo[a],t.min[a]);hi[a]=Math.max(hi[a],t.max[a]);}const box=new T.Box3(new T.Vector3(...lo),new T.Vector3(...hi));if(items.length<=12)return {box,items};const sizes=hi.map((v,a)=>v-lo[a]),axis=sizes.indexOf(Math.max(...sizes));items.sort((a,b)=>a.c[axis]-b.c[axis]);const n=items.length>>1;return {box,left:build(items.slice(0,n)),right:build(items.slice(n))};}
+ const tree=build(tri),inverse=new T.Matrix4(),localRay=new T.Ray(),a=new T.Vector3(),b=new T.Vector3(),c=new T.Vector3(),point=new T.Vector3();
+ mesh.raycast=function(raycaster,hits){inverse.copy(this.matrixWorld).invert();localRay.copy(raycaster.ray).applyMatrix4(inverse);let nearest=Infinity,best=null;const stack=[tree];while(stack.length){const n=stack.pop();if(!localRay.intersectsBox(n.box))continue;if(n.items){for(const t of n.items){a.fromBufferAttribute(p,t.ids[0]);b.fromBufferAttribute(p,t.ids[1]);c.fromBufferAttribute(p,t.ids[2]);if(localRay.intersectTriangle(a,b,c,false,point)){point.applyMatrix4(this.matrixWorld);const d=raycaster.ray.origin.distanceTo(point);if(d>=raycaster.near&&d<=raycaster.far&&d<nearest){nearest=d;best=point.clone();}}}}else{stack.push(n.left,n.right);}}if(best)hits.push({distance:nearest,point:best,object:this});};
+}

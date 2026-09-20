@@ -1,0 +1,1 @@
+{"name":"almas-battleground","version":"0.1.0","type":"module","private":true,"scripts":{"start":"python -m http.server 8080","check":"node --check game.js"},"imports":{"three":"./vendor/three.module.js"}}
